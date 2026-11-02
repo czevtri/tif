@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>El párrafo TEAL</title>
+<style>
+  :root{
+    --t:#c8f5c8; --e:#f9cdef; --a:#fdf3a8; --l:#c6f1f5;
+    --rep:#dcd9f7; --ana:#ffd9b8; --afi:#cfe6ff; --des:#e6e6e6;
+    --ink:#111; --grey:#777; --line:#ddd;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:#fff;color:var(--ink)}
+  body{font-family:Georgia,"Times New Roman",serif;min-height:100vh;display:flex;flex-direction:column}
+  header{padding:18px 24px 0;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+  .tabs,.modes{display:flex;flex-wrap:wrap;gap:8px}
+  button{font-family:"IBM Plex Mono","Courier New",monospace;font-size:13px;padding:8px 14px;border:1px solid var(--ink);background:#fff;color:var(--ink);cursor:pointer;border-radius:3px}
+  button:hover{background:#f3f3f3}
+  button[aria-pressed="true"]{background:var(--ink);color:#fff}
+  main{flex:1;display:flex;align-items:center;justify-content:center;padding:16px 24px 24px;overflow:auto}
+  #parrafo{max-width:1100px;font-size:clamp(18px,2.1vw,27px);line-height:1.45;text-align:left}
+  #parrafo span.s{padding:2px 0;border-radius:3px;transition:background .25s}
+  #parrafo span.s .tag{display:none;font-family:"IBM Plex Mono","Courier New",monospace;font-size:.45em;vertical-align:super;margin-left:3px;color:#333}
+  body.showtags #parrafo span.s .tag{display:inline}
+  .info{padding:10px 24px 0;min-height:52px;display:flex;flex-wrap:wrap;gap:6px 28px;align-items:center;justify-content:space-between;font-family:"IBM Plex Mono","Courier New",monospace;font-size:12.5px;color:var(--grey)}
+  .legend{display:flex;flex-wrap:wrap;gap:8px 18px}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .legend i{display:inline-block;width:18px;height:14px;border-radius:2px;border:1px solid #ccc}
+  .cite{font-style:italic}
+  .note{width:100%;font-size:12px}
+  @media (max-width:600px){header{padding:12px 14px 0}main{padding:12px 14px 16px}.info{padding:8px 14px 0}}
+</style>
+</head>
+<body>
+<header>
+  <div class="tabs" id="tabs"></div>
+  <div class="modes">
+    <button data-mode="none" aria-pressed="true">Sin marcas</button>
+    <button data-mode="teal">TEAL</button>
+    <button data-mode="tipo">Tipo de oración</button>
+    <button data-mode="tags" id="tagsBtn" aria-pressed="false">Etiquetas</button>
+  </div>
+</header>
+<div class="info">
+  <div class="legend" id="legend"></div>
+  <div class="cite" id="cite"></div>
+  <div class="note" id="note"></div>
+</div>
+<main><p id="parrafo"></p></main>
+
+<script>
+const TEAL = { T:['T · Tesis','--t'], E:['E · Evidencia','--e'], A:['A · Análisis','--a'], L:['L · Link (cierre)','--l'] };
+const TIPO = { afirma:['Afirma','--afi'], reporta:['Reporta','--rep'], analiza:['Analiza','--ana'] };
+
+const DATA = [
+ {
+  name:'Párrafo 1 · Dambo (balanceado)',
+  cite:'Párrafo de la sección 3 del artículo de ejemplo (Stoltz–Bennett). Patrón T · E · E · A · A · L',
+  note:'',
+  s:[
+   ['En las esculturas de Thomas Dambo el material decide la forma final de la obra, pero el artista sigue siendo quien la inicia.','T','afirma'],
+   ['Stoltz (2023) describe los trolls como objetos artísticos que se mezclan visual y físicamente con el paisaje y quedan tan expuestos al clima como los árboles de cuyos restos fueron hechos (p. 7).','E','reporta'],
+   ['El propio Dambo explica que evita la pintura plástica para que, si la escultura queda en el bosque, sea «solo madera y clavos que se oxidarán y volverán a la tierra» (citado en Stoltz, 2023, p. 7).','E','reporta'],
+   ['Es decir, el deterioro no es algo que le ocurre a la obra por accidente: está previsto en su diseño.','A','analiza'],
+   ['Leído desde Bennett (2010), esto supone que la agencia de la madera, los clavos y la lluvia no aparece recién al final, sino que forma parte de la idea del artista desde el inicio.','A','analiza'],
+   ['La prioridad del material que Stoltz reconoce en el resultado estaba, entonces, ya en el punto de partida.','L','afirma']
+  ]
+ },
+ {
+  name:'Párrafo 2 · Stoltz (más evidencia)',
+  cite:'Párrafo de la sección 1 del artículo de ejemplo: presentar a un autor. Patrón T · E · E · E · A · L (la evidencia ocupa la mitad del párrafo)',
+  note:'',
+  s:[
+   ['Para Stoltz (2023), lo que distingue al arte ecológico es que el material no desaparece detrás de la obra.','T','afirma'],
+   ['En la teoría del arte heredada del Renacimiento, explica, el material es una sustancia que el artista transforma y que debe volverse invisible una vez terminada la obra: el espectador ve la figura, no el mármol (pp. 2–3).','E','reporta'],
+   ['En el arte ecológico, en cambio, el material «tiene prioridad»: no queda detrás de la obra sino que se vuelve su coprotagonista o casi su único protagonista (p. 12).','E','reporta'],
+   ['Stoltz lo muestra en tres facetas: el material se somete a la naturaleza y no al artista, el objeto terminado se vuelve material para otros usos, y el material natural, el aire, el agua, la madera, pasa a ser el tema de la obra (pp. 15–16).','E','reporta'],
+   ['Lo que esta definición invierte es la relación lineal entre material y obra que la tradición daba por sentada.','A','analiza'],
+   ['Esa inversión es el punto de partida para preguntar qué lugar le queda al artista.','L','afirma']
+  ]
+ },
+ {
+  name:'Párrafo 3 · Saraceno (más análisis)',
+  cite:'Párrafo de la sección 3 del artículo de ejemplo: discutir con un autor. Patrón T · E · A · A · A · L (el análisis ocupa la mitad del párrafo)',
+  note:'',
+  s:[
+   ['En el <em>Aerocene</em> de Saraceno, la agencia del material deja de ser algo que Stoltz describe y pasa a ser algo que la obra misma organiza.','T','afirma'],
+   ['Stoltz (2023) señala que el globo de plástico reciclado vuela solo con aire y calor, puede ser construido por el público siguiendo las instrucciones del artista, y es a la vez objeto artístico y material para experimentar (p. 11).','E','reporta'],
+   ['Es decir, en este caso ni siquiera hay un resultado final que el material «decida»: la obra es un sistema en el que aire, plástico, sol y personas actúan juntos.','A','analiza'],
+   ['Leído desde Bennett (2010), esto es un ensamblaje en sentido estricto, una agencia distribuida entre actantes humanos y no humanos, donde el artista aporta las instrucciones pero no el vuelo.','A','analiza'],
+   ['Lo notable es que Stoltz lo describe con precisión y, sin embargo, sigue presentándolo como lo que Saraceno «quiere crear», es decir, con el vocabulario del iniciador.','A','analiza'],
+   ['Saraceno es, entonces, el caso donde la descripción de Stoltz más se acerca a Bennett y su vocabulario más se aleja de ella.','L','afirma']
+  ]
+ }
+];
+
+let cur = 0, mode = 'none', tags = false;
+const $ = (id) => document.getElementById(id);
+
+function render(){
+  const d = DATA[cur];
+  const p = $('parrafo'); p.innerHTML = '';
+  d.s.forEach((x,i) => {
+    const sp = document.createElement('span'); sp.className = 's';
+    sp.innerHTML = x[0];
+    const tg = document.createElement('span'); tg.className = 'tag';
+    tg.textContent = mode === 'teal' ? x[1] : mode === 'tipo' ? TIPO[x[2]][0].split(' ')[0].toLowerCase() : '';
+    sp.appendChild(tg);
+    if (mode === 'teal') sp.style.background = `var(${TEAL[x[1]][1]})`;
+    else if (mode === 'tipo') sp.style.background = `var(${TIPO[x[2]][1]})`;
+    else sp.style.background = 'transparent';
+    p.appendChild(sp);
+    if (i < d.s.length - 1) p.appendChild(document.createTextNode(' '));
+  });
+  const lg = $('legend'); lg.innerHTML = '';
+  const src = mode === 'teal' ? TEAL : mode === 'tipo' ? TIPO : null;
+  if (src) {
+    const used = new Set(d.s.map(x => mode === 'teal' ? x[1] : x[2]));
+    Object.keys(src).forEach(k => {
+      if (!used.has(k)) return;
+      const el = document.createElement('span');
+      el.innerHTML = `<i style="background:var(${src[k][1]})"></i>${src[k][0]}`;
+      lg.appendChild(el);
+    });
+  }
+  $('cite').textContent = d.cite;
+  $('note').textContent = d.note;
+  document.body.classList.toggle('showtags', tags);
+  document.querySelectorAll('#tabs button').forEach((b,i) => b.setAttribute('aria-pressed', i === cur));
+  document.querySelectorAll('.modes button[data-mode]').forEach(b => {
+    if (b.dataset.mode === 'tags') b.setAttribute('aria-pressed', tags);
+    else b.setAttribute('aria-pressed', b.dataset.mode === mode);
+  });
+}
+
+DATA.forEach((d,i) => {
+  const b = document.createElement('button'); b.textContent = d.name;
+  b.onclick = () => { cur = i; render(); };
+  $('tabs').appendChild(b);
+});
+document.querySelectorAll('.modes button').forEach(b => {
+  b.onclick = () => {
+    if (b.dataset.mode === 'tags') tags = !tags;
+    else mode = b.dataset.mode;
+    render();
+  };
+});
+document.addEventListener('keydown', e => {
+  if (e.key === '1') mode = 'none';
+  else if (e.key === '2') mode = 'teal';
+  else if (e.key === '3') mode = 'tipo';
+  else if (e.key === 'ArrowRight') cur = (cur + 1) % DATA.length;
+  else if (e.key === 'ArrowLeft') cur = (cur + DATA.length - 1) % DATA.length;
+  else if (e.key.toLowerCase() === 'e') tags = !tags;
+  else return;
+  render();
+});
+render();
+</script>
+</body>
+</html>
